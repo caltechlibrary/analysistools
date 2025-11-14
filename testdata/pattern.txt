@@ -1,0 +1,82 @@
+acp
+affiant
+affidavit*
+atorn*
+attorn*
+attorn* w/5 client*
+attorney client privilege
+attorney work product
+Attorney*
+attrny
+atty*
+ATTY-CLIENT PRIVILEDGE*
+ATTY-CLIENT PRIVILEGE*
+awp
+complainant* w/5 brief*
+complainant* w/5 complaint*
+complainant* w/5 memo
+complainant* w/5 memoranda
+complainant* w/5 memorandum
+complainant* w/5 motion*
+complainant* w/5 petition*
+counsel*
+counselor
+counsil*
+declarant
+declaration*
+defendant* w/5 brief*
+defendant* w/5 complaint*
+defendant* w/5 memo
+defendant* w/5 memoranda
+defendant* w/5 memorandum
+defendant* w/5 motion*
+defendant* w/5 petition*
+deponent*
+Deponents
+depos
+depose*
+Deposition
+Depositions
+Esq
+esquire
+law
+laws
+Lawsuit
+lawyer
+legal
+Legal Counsel
+litigat*
+outside counsel
+plaintiff* w/5 brief*
+plaintiff* w/5 complaint*
+plaintiff* w/5 memo
+plaintiff* w/5 memoranda
+plaintiff* w/5 memorandum
+plaintiff* w/5 motion*
+plaintiff* w/5 petition*
+prepar* w/4 litigat
+Priv*
+Priveledge*
+privelege*
+Privelidge*
+Privelige*
+privil*
+privilage*
+Priviledge*
+privilege*
+privileged and confidential
+Privledge*
+respondent* w/5 brief*
+respondent* w/5 complaint*
+respondent* w/5 memo
+respondent* w/5 memoranda
+respondent* w/5 memorandum
+respondent* w/5 motion*
+respondent* w/5 petition*
+suit
+summary judgment
+testify*
+testimony*
+transcript*
+work w/2 product
+wp
