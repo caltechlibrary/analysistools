@@ -31,7 +31,7 @@ const (
 # ACTION
 
 check [OPTION] PATTERN_FILE FILE_TO_CHECK [FILE_TO_CHECK ...]
-: Report the matches found based on PATTERN_FILE content
+: Report the matches found based on PATTERN_FILE in the FILE_TO_CHECK
 
 filetypes PATH
 : Walk the PATH directory and report file type counts based on file extension

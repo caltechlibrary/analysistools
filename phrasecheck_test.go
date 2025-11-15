@@ -340,6 +340,20 @@ func TestPhraseCheckReader(t *testing.T) {
 			want: "Line 0: Match for \"attorn* w/5 client*\" in : \"The attorn represented the client.\"",
 			wantErr: false,
 		},
+		{
+			name: "keyword match",
+			input: "Regarding ATTY-CLIENT PRIVILEDGE materials you sent",
+			patterns: []*Pattern{
+				{
+					Type:         Proximity,
+					Keyword: "ATTY-CLIENT PRIVILEGE",
+					MaxDistance:  0,
+					OriginalText: "ATTY-CLIENT PRIVILEDGE*",
+				},
+			},
+			want: "Line 0: Match for \"ATTY-CLIENT PRIVILEDGE*\" in : \"Regarding ATTY-CLIENT PRIVILEDGE materials you sent\"",
+			wantErr: false,
+		},
 	}
 
 	for _, tt := range tests {

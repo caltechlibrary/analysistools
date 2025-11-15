@@ -1,4 +1,4 @@
-%phrasecheck(1) user manual | version 0.0.0 6991e8a
+%phrasecheck(1) user manual | version 0.0.0 6a0f789
 % R. S. Doiel
 % 2025-11-14
 
@@ -28,7 +28,7 @@ phrasecheck performs actions based on phrase checking.
 # ACTION
 
 check [OPTION] PATTERN_FILE FILE_TO_CHECK [FILE_TO_CHECK ...]
-: Report the matches found based on PATTERN_FILE content
+: Report the matches found based on PATTERN_FILE in the FILE_TO_CHECK
 
 filetypes PATH
 : Walk the PATH directory and report file type counts based on file extension

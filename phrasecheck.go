@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"fmt"
 	"io"
-//	"log"
 	"os"
 	"regexp"
 	"strconv"
@@ -55,13 +54,23 @@ func ParsePattern(pattern string) (*Pattern, error) {
 	if len(parts) == 0 {
 		return nil, fmt.Errorf("missing pattern")
 	}
-	if len(parts) == 2 || len(parts) > 3 {
+	if len(parts) > 3 {
 		return nil, fmt.Errorf("malformed proximity pattern: %q", pattern)
 	}
 	if len(parts) == 1 {
 		return &Pattern{
 			Type: Keyword,
 			Keyword: strings.TrimSuffix(parts[0], "*"),
+			OriginalText: pattern,
+		}, nil
+	}
+	if len(parts) == 2 {
+		if strings.HasPrefix(parts[1], "w/") {
+			return nil, fmt.Errorf("malformed proximity pattern: %q", pattern)
+		}
+		return &Pattern{
+			Type: Keyword,
+			Keyword: pattern,
 			OriginalText: pattern,
 		}, nil
 	}
@@ -199,8 +208,40 @@ type PhraseCheckApp struct {
 	appName string
 }
 
+
+// checkFile will read a file stream and display matches to standard out and return any errors
+func checkFile(fName string, patterns []*Pattern) error {
+	in, err := os.Open(fName)
+	if err != nil {
+		return err
+	}
+	defer in.Close()
+	matches, err := PhraseCheckReader(bufio.NewReader(in), patterns, false)
+	if err != nil {
+		return err
+	}
+	for _, match := range matches {
+		fmt.Printf("%s\n", match.String())
+	}
+	return nil
+}
+
 func (app *PhraseCheckApp) Check(params []string) error {
-	return fmt.Errorf("Check not implemented")
+	if len(params) < 2 {
+		return fmt.Errorf("missing pattern filename and files to process")
+	}
+	var fName string
+	fName, params = params[0], params[1:]
+	patterns, err := LoadPatterns(fName)
+	if err != nil {
+		return err
+	}
+	for _, checkFName := range params {
+		if err := checkFile(checkFName, patterns); err != nil {
+			return err
+		}
+	}
+	return err
 }
 
 func (app *PhraseCheckApp) PruneMatches(params []string) error {
