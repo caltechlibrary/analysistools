@@ -28,7 +28,7 @@
   ],
   "name": "analysistools",
   "programmingLanguage": [
-    "Go >= 1.25"
+    "Go"
   ],
   "softwareRequirements": [
     "Go >= 1.25",
@@ -36,7 +36,8 @@
   ],
   "softwareSuggestions": [
     "Pandoc >= 3",
-    "GNU Make >= 3"
+    "GNU Make >= 3",
+    "PageFind >= 1.4.0"
   ],
   "version": "0.0.0",
   "developmentStatus": "concept",

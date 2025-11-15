@@ -13,7 +13,7 @@ version: 0.0.0
 
 
 programming_language:
-  - Go &gt;&#x3D; 1.25
+  - Go
 
 keywords:
   - file system
@@ -47,7 +47,7 @@ This is a set of tools for done text analysis of files on the file system.
 
 ### Programming languages
 
-- Go >= 1.25
+- Go
 
 
 
@@ -62,5 +62,6 @@ This is a set of tools for done text analysis of files on the file system.
 
 - Pandoc &gt;&#x3D; 3
 - GNU Make &gt;&#x3D; 3
+- PageFind &gt;&#x3D; 1.4.0
 
 

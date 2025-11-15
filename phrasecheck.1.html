@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+    <title>analysistools</title>
+    <link rel="stylesheet" href="https://caltechlibrary.github.io/css/site.css">
+    <link rel="stylesheet" href="https://media.library.caltech.edu/cl-webcomponents/css/code-blocks.css">
+    <script type="module" src="https://media.library.caltech.edu/cl-webcomponents/copyToClipboard.js"></script>
+    <script type="module" src="https://media.library.caltech.edu/cl-webcomponents/footer-global.js"></script>
+</head>
+<body>
+<header>
+<a href="https://library.caltech.edu"><img src="https://media.library.caltech.edu/assets/caltechlibrary-logo.png" alt="Caltech Library logo"></a>
+</header>
+<nav>
+<ul>
+    <li><a href="/">Home</a></li>
+    <li><a href="index.html">README</a></li>
+    <li><a href="LICENSE">LICENSE</a></li>
+    <li><a href="INSTALL.html">INSTALL</a></li>
+    <li><a href="user_manual.html">User Manual</a></li>
+    <li><a href="about.html">About</a></li>
+    <li><a href="search.html">Search</a></li>
+    <li><a href="https://github.com/caltechlibrary/analysistools">GitHub</a></li>
+</ul>
+</nav>
+<section>
+<h1 id="name">NAME</h1>
+<p>phrasecheck</p>
+<h1 id="synopsis">SYNOPSIS</h1>
+<p>phrasecheck <a href="#options">OPTIONS</a> ACTION [PARAMS]</p>
+<h1 id="description">DESCRIPTION</h1>
+<p>phrasecheck performs actions based on phrase checking.</p>
+<h1 id="options">OPTIONS</h1>
+<dl>
+<dt>-help</dt>
+<dd>
+Display help
+</dd>
+<dt>-version</dt>
+<dd>
+Display version
+</dd>
+<dt>-license</dt>
+<dd>
+Display license
+</dd>
+</dl>
+<h1 id="action">ACTION</h1>
+<dl>
+<dt>check [OPTION] PATTERN_FILE FILE_TO_CHECK [FILE_TO_CHECK …]</dt>
+<dd>
+Report the matches found based on PATTERN_FILE content
+</dd>
+<dt>filetypes PATH</dt>
+<dd>
+Walk the PATH directory and report file type counts based on file
+extension
+</dd>
+<dt>prune PATTERN_FILE PATH_TO_CHECK [PATH_TO_CHECK …]</dt>
+<dd>
+Walk the paths provided and remove files that match what is in the
+PATTERN_FILE.
+</dd>
+</dl>
+<p>Check a file(s) against the contents of the PATTERN_FILE. Report
+matches for line numbers and phrases matched</p>
+<h1 id="example">EXAMPLE</h1>
+<pre class="shell"><code>phrasecheck check patterns.txt email.txt</code></pre>
+</section>
+<footer-global></footer-global>
+</body>
+</html>
