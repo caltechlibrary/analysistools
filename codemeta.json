@@ -12,9 +12,9 @@
     }
   ],
   "dateCreated": "2025-11-14",
-  "dateModified": "2025-11-14",
-  "datePublished": "2025-11-14",
-  "description": "This is a set of tools for done text analysis of files on the file system.",
+  "dateModified": "2025-11-18",
+  "datePublished": "2025-11-18",
+  "description": "An experimental package for Archival text analysis on the file system. It\nprovide a phrase check tool and some file type analysis based on file extensions.",
   "funder": [
     {
       "name": "Caltech Library",
@@ -39,10 +39,10 @@
     "GNU Make >= 3",
     "PageFind >= 1.4.0"
   ],
-  "version": "0.0.0",
+  "version": "0.0.1",
   "developmentStatus": "concept",
   "issueTracker": "https://github.com/caltechlibrary/analysistools",
-  "releaseNotes": "An experimental package for Archival text analysis on the file system.",
+  "releaseNotes": "Proof of concept experimental package for Archival text analysis on the file system.",
   "copyrightYear": 2025,
   "copyrightHolder": "California Institute of Technology"
 }

@@ -47,23 +47,42 @@ Display license
 </dl>
 <h1 id="action">ACTION</h1>
 <dl>
-<dt>check [OPTION] PATTERN_FILE FILE_TO_CHECK [FILE_TO_CHECK …]</dt>
+<dt>check-file [OPTION] PATTERN_FILE FILE_TO_CHECK [FILE_TO_CHECK
+…]</dt>
 <dd>
-Report the matches found based on PATTERN_FILE content
+Report the matches found based on PATTERN_FILE in the FILE_TO_CHECK.
 </dd>
-<dt>filetypes PATH</dt>
+<dt>check-directory [OPTION] PATTERN_FILE PATH
+[EXCLUDE_LIST_FILENAME]</dt>
 <dd>
-Walk the PATH directory and report file type counts based on file
-extension
+Walk the directory indicated by PATH. Check any text files against the
+PATTERN_FILE contents. Report matches.
 </dd>
-<dt>prune PATTERN_FILE PATH_TO_CHECK [PATH_TO_CHECK …]</dt>
+<dt>filetypes PATH [EXCLUDE_LIST_FILENAME]</dt>
 <dd>
-Walk the paths provided and remove files that match what is in the
-PATTERN_FILE.
+Walk the PATH directory and report file and it’s likely mime type
+</dd>
+<dt>filetype-counts PATH [EXCLUDE_LIST_FILENAME]</dt>
+<dd>
+Walk the PATH directory and aggregate counts by file extension and mime
+type
+</dd>
+<dt>prune PATTERN_FILE PATH [EXCLUDE_LIST_FILENAME]</dt>
+<dd>
+Walk the PATH directory and remove files that have at least one match in
+the PATTERN_FILE.
+</dd>
+<dt>PATTERN_FILE</dt>
+<dd>
+This holds a list of patterns to match against, one pattern statement
+per line.
+</dd>
+<dt>EXCLUDE_LIST_FILENAME</dt>
+<dd>
+This is a file contains a list (one entry per line) of path elements to
+be excluded from the walk.
 </dd>
 </dl>
-<p>Check a file(s) against the contents of the PATTERN_FILE. Report
-matches for line numbers and phrases matched</p>
 <h1 id="example">EXAMPLE</h1>
 <pre class="shell"><code>phrasecheck check patterns.txt email.txt</code></pre>
 </section>

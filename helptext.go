@@ -30,16 +30,27 @@ const (
 
 # ACTION
 
-check [OPTION] PATTERN_FILE FILE_TO_CHECK [FILE_TO_CHECK ...]
-: Report the matches found based on PATTERN_FILE in the FILE_TO_CHECK
+check-file [OPTION] PATTERN_FILE FILE_TO_CHECK [FILE_TO_CHECK ...]
+: Report the matches found based on PATTERN_FILE in the FILE_TO_CHECK.
 
-filetypes PATH
-: Walk the PATH directory and report file type counts based on file extension
+check-directory [OPTION] PATTERN_FILE PATH [EXCLUDE_LIST_FILENAME]
+: Walk the directory indicated by PATH. Check any text files against the
+PATTERN_FILE contents. Report matches.
 
-prune PATTERN_FILE PATH_TO_CHECK [PATH_TO_CHECK ...]
-: Walk the paths provided and remove files that match what is in the PATTERN_FILE.
+filetypes PATH [EXCLUDE_LIST_FILENAME]
+: Walk the PATH directory and report file and it's likely mime type
 
-Check a file(s) against the contents of the PATTERN_FILE. Report matches for line numbers and phrases matched
+filetype-counts PATH [EXCLUDE_LIST_FILENAME]
+: Walk the PATH directory and aggregate counts by file extension and mime type
+
+prune PATTERN_FILE PATH [EXCLUDE_LIST_FILENAME]
+: Walk the PATH directory and remove files that have at least one match in the PATTERN_FILE.
+
+PATTERN_FILE
+: This holds a list of patterns to match against, one pattern statement per line.
+
+EXCLUDE_LIST_FILENAME
+: This is a file contains a list (one entry per line) of path elements to be excluded from the walk.
 
 # EXAMPLE
 

@@ -1,0 +1,3 @@
+/pagefind/
+/pagefind/
+/.git/

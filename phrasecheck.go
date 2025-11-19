@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path"
+	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
@@ -26,7 +28,7 @@ type Matched struct {
 }
 
 func (m *Matched) String() string {
-	return fmt.Sprintf("Line %d: Match for %q in : %q", m.Line, m.Pattern, m.Text)
+	return fmt.Sprintf("%d,%q,%q", m.Line, m.Pattern, m.Text)
 }
 
 func MatchedStrings(matches []*Matched) string {
@@ -208,6 +210,7 @@ type PhraseCheckApp struct {
 	appName string
 }
 
+const phraseCheckCSVHeader = "\"filename\",\"line no\",\"pattern\",\"phrase\""
 
 // checkFile will read a file stream and display matches to standard out and return any errors
 func checkFile(fName string, patterns []*Pattern) error {
@@ -221,12 +224,42 @@ func checkFile(fName string, patterns []*Pattern) error {
 		return err
 	}
 	for _, match := range matches {
-		fmt.Printf("%s\n", match.String())
+		fmt.Printf("%q,%s\n", fName, match.String())
 	}
 	return nil
 }
 
-func (app *PhraseCheckApp) Check(params []string) error {
+// checkDirectory takes an initial path, a set of pattens and optional exclude list and
+// walks the directory and reports matches for any text files found.
+func checkDirectory(startDir string, patterns []*Pattern, excludeList []string) error {
+	fmt.Println(phraseCheckCSVHeader)
+	err := filepath.Walk(startDir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		// Skip if it's a directory and in the exclude list
+		if info.IsDir() {
+			for _, exclude := range excludeList {
+				if strings.Contains(path, exclude) {
+					return filepath.SkipDir
+				}
+			}
+			return nil
+		}
+
+		// Skip if the file is in the exclude list
+		for _, exclude := range excludeList {
+			if strings.Contains(path, exclude) {
+				return nil
+			}
+		}
+		return checkFile(path, patterns)
+	})
+	return err
+}
+
+
+func (app *PhraseCheckApp) CheckFile(params []string) error {
 	if len(params) < 2 {
 		return fmt.Errorf("missing pattern filename and files to process")
 	}
@@ -236,6 +269,7 @@ func (app *PhraseCheckApp) Check(params []string) error {
 	if err != nil {
 		return err
 	}
+	fmt.Println(phraseCheckCSVHeader)
 	for _, checkFName := range params {
 		if err := checkFile(checkFName, patterns); err != nil {
 			return err
@@ -244,21 +278,151 @@ func (app *PhraseCheckApp) Check(params []string) error {
 	return err
 }
 
-func (app *PhraseCheckApp) PruneMatches(params []string) error {
-	return fmt.Errorf("PruneMatches not implemented")
+func (app *PhraseCheckApp) CheckDirectory(params []string) error {
+	if len(params) < 2 {
+		return fmt.Errorf("missing pattern filename and directory to process")
+	}
+	var (
+		fName string // pattern filename
+		dirName string // directory to walk
+		excludeList []string // an option list of paths to exclude
+		err error
+	)
+	if len(params) >= 2 {
+		fName, dirName = params[0], params[1]
+	}
+	if len(params) > 2 {
+		excludeList, err = parseExcludeListFile(params[2])
+		if err != nil {
+			return err
+		}
+	}
+	patterns, err := LoadPatterns(fName)
+	if err != nil {
+		return err
+	}
+	if err := checkDirectory(dirName, patterns, excludeList); err != nil {
+		return err
+	}
+	return err
+}
+
+func parseExcludeListFile(excludeListName string) ([]string, error) {
+	excludeList := []string{}
+	src, err := os.ReadFile(excludeListName)
+	if err != nil {
+		return nil, fmt.Errorf("unable to read %q, %s", excludeListName, err)
+	}
+	txt := fmt.Sprintf("%s", src)
+	for _, line := range strings.Split(txt, "\n") {
+		if strings.TrimSpace(line) != "" {
+			excludeList = append(excludeList, strings.TrimSpace(line))
+		}
+	}
+	return excludeList, err
 }
 
 func (app *PhraseCheckApp) FileTypes(params []string) error {
-	return fmt.Errorf("FileTypes not implemented")
+	if len(params) == 0 {
+		return fmt.Errorf("expected a starting directory to crawl")
+	}
+	if len(params) > 2 {
+		return fmt.Errorf("too many parameters provided")
+	}
+	var (
+		startDir string
+		excludeListName string
+		excludeList []string
+		err error
+	)
+	if len(params) == 1 {
+		startDir = params[0]
+	}
+	if len(params) == 2 {
+		startDir, excludeListName = params[0], params[1]
+	}
+	if excludeListName != "" {
+		excludeList, err = parseExcludeListFile(excludeListName)
+		if err != nil {
+			return err
+		}
+	}
+	fileTypes, err := FileTypes(startDir, excludeList)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("\"file path\",\"mime type\"\n")
+	for file, fileType := range fileTypes {
+		fmt.Printf("%q,%q\n", file, fileType)
+	}
+	return nil
 }
+
+func (app *PhraseCheckApp) FileTypeCounts(params []string) error {
+	if len(params) == 0 {
+		return fmt.Errorf("expected a starting directory to crawl")
+	}
+	if len(params) > 2 {
+		return fmt.Errorf("too many parameters provided")
+	}
+	var (
+		startDir string
+		excludeListName string
+		excludeList []string
+		err error
+	)
+	if len(params) == 1 {
+		startDir = params[0]
+	}
+	if len(params) == 2 {
+		startDir, excludeListName = params[0], params[1]
+	}
+	if excludeListName != "" {
+		excludeList, err = parseExcludeListFile(excludeListName)
+		if err != nil {
+			return err
+		}
+	}
+	fileTypes, err := FileTypes(startDir, excludeList)
+	if err != nil {
+		return err
+	}
+	cnts := map[string]int{}
+	for file, _ := range fileTypes {
+		ext := path.Ext(file)
+		if cnt, ok := cnts[ext]; ok {
+			cnts[ext] = cnt + 1
+		} else {
+			cnts[ext] = 1
+		}
+	}
+	fmt.Printf("\"file ext\",\"mime type\",\"count\"\n")
+	for k, v := range cnts {
+		if mimeType, ok := extensionToMIME[k]; ok {
+			fmt.Printf("%q,%q,%d\n", k, mimeType, v)
+		} else {
+			fmt.Printf("%q,%q,%d\n", k, "", v)
+		}
+	}
+	return nil
+}
+
+func (app *PhraseCheckApp) PruneMatches(params []string) error {
+	return fmt.Errorf("PruneMatches(%+v) not implemented", params)
+}
+
 
 func (app *PhraseCheckApp) Run(appName string, action string, params []string) error {
 	app.appName = appName
 	switch action {
 	case "filetypes":
 		return app.FileTypes(params)
-	case "check":
-		return app.Check(params)
+	case "filetype-counts":
+		return app.FileTypeCounts(params)
+	case "check-file":
+		return app.CheckFile(params)
+	case "check-directory":
+		return app.CheckDirectory(params)
 	case "prune":
 		return app.PruneMatches(params)
 	default:

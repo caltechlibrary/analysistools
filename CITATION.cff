@@ -3,7 +3,8 @@ cff-version: 1.2.0
 message: "If you use this software, please cite it as below."
 type: software
 title: analysistools
-abstract: "This is a set of tools for done text analysis of files on the file system."
+abstract: "An experimental package for Archival text analysis on the file system. It
+provide a phrase check tool and some file type analysis based on file extensions."
 authors:
   - family-names: Doiel
     given-names: R. S.
@@ -12,8 +13,8 @@ authors:
 
 
 repository-code: "https://github.com/caltechlibrary/analysistools"
-version: 0.0.0
-date-released: 2025-11-14
+version: 0.0.1
+date-released: 2025-11-18
 
 
 keywords:

@@ -1,6 +1,7 @@
 ---
 title: analysistools
-abstract: "This is a set of tools for done text analysis of files on the file system."
+abstract: "An experimental package for Archival text analysis on the file system. It
+provide a phrase check tool and some file type analysis based on file extensions."
 authors:
   - family_name: Doiel
     given_name: R. S.
@@ -9,7 +10,7 @@ authors:
 
 
 repository_code: https://github.com/caltechlibrary/analysistools
-version: 0.0.0
+version: 0.0.1
 
 
 programming_language:
@@ -20,15 +21,15 @@ keywords:
   - analysis
   - text views
 
-date_released: 2025-11-14
+date_released: 2025-11-18
 ---
 
 About this software
 ===================
 
-## analysistools 0.0.0
+## analysistools 0.0.1
 
-An experimental package for Archival text analysis on the file system.
+Proof of concept experimental package for Archival text analysis on the file system.
 
 ### Authors
 
@@ -39,7 +40,8 @@ An experimental package for Archival text analysis on the file system.
 
 
 
-This is a set of tools for done text analysis of files on the file system.
+An experimental package for Archival text analysis on the file system. It
+provide a phrase check tool and some file type analysis based on file extensions.
 
 
 - GitHub: <https://github.com/caltechlibrary/analysistools>
