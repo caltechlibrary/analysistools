@@ -10,7 +10,7 @@ authors:
 
 
 repository_code: https://github.com/caltechlibrary/analysistools
-version: 0.0.1
+version: 0.0.2
 
 
 programming_language:
@@ -21,15 +21,15 @@ keywords:
   - analysis
   - text views
 
-date_released: 2025-11-18
+date_released: 2025-11-20
 ---
 
 About this software
 ===================
 
-## analysistools 0.0.1
+## analysistools 0.0.2
 
-Proof of concept experimental package for Archival text analysis on the file system.
+Swapped filepath.Walk() with filepath.WalkDir() for improved performance.
 
 ### Authors
 

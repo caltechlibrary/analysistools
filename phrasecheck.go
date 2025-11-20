@@ -415,6 +415,9 @@ func (app *PhraseCheckApp) PruneMatches(params []string) error {
 func (app *PhraseCheckApp) Run(appName string, action string, params []string) error {
 	app.appName = appName
 	switch action {
+	case "help":
+		 fmt.Fprintf(os.Stdout, "%s\n", FmtHelp(HelpText, appName, Version, ReleaseDate, ReleaseHash))
+		 return nil
 	case "filetypes":
 		return app.FileTypes(params)
 	case "filetype-counts":

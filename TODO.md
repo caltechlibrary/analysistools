@@ -3,6 +3,7 @@
 
 ## Bugs
 
+- [ ] When I try to run `phrasecheck filetypes "$HOME"` on macOS it am getting an open error
 - [ ] Missing documentation show examples and integration choices
 
 ## Up next

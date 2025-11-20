@@ -1,6 +1,6 @@
-%phrasecheck(1) user manual | version 0.0.1 a1c67f7
+%phrasecheck(1) user manual | version 0.0.2 5503d07
 % R. S. Doiel
-% 2025-11-18
+% 2025-11-20
 
 # NAME
 
