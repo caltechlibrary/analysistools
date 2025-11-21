@@ -30,6 +30,9 @@ About this software
 ## analysistools 0.0.2
 
 Swapped filepath.Walk() with filepath.WalkDir() for improved performance.
+Refined checking process by implementing a tokenizer that returns words and new lines.
+Upgrade methods for matching to handle prefix and suffix asterix as well as as exact match.
+Improved proximity checking and testing.
 
 ### Authors
 
