@@ -1,5 +1,5 @@
 <#
-generated with CMTools 0.0.1 cffd2b9
+generated with CMTools 0.0.4 d9b4e17
 
 .SYNOPSIS
 Release script for analysistools on GitHub using gh CLI.
