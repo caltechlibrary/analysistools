@@ -12,8 +12,8 @@
     }
   ],
   "dateCreated": "2025-11-14",
-  "dateModified": "2025-11-20",
-  "datePublished": "2025-11-20",
+  "dateModified": "2025-11-21",
+  "datePublished": "2025-11-21",
   "description": "An experimental package for Archival text analysis on the file system. It\nprovide a phrase check tool and some file type analysis based on file extensions.",
   "funder": [
     {
@@ -39,10 +39,10 @@
     "GNU Make >= 3",
     "PageFind >= 1.4.0"
   ],
-  "version": "0.0.2",
+  "version": "0.0.3",
   "developmentStatus": "concept",
   "issueTracker": "https://github.com/caltechlibrary/analysistools",
-  "releaseNotes": "Swapped filepath.Walk() with filepath.WalkDir() for improved performance.\nRefined checking process by implementing a tokenizer that returns words and new lines.\nUpgrade methods for matching to handle prefix and suffix asterix as well as as exact match.\nImproved proximity checking and testing.",
+  "releaseNotes": "Renamed filetypes action to mimetypes and app func FileTypes to MimeTypes to better reflect the output.\nRemoved prune option, since the output of the analysis includes filenames and can be easily processed with Python.",
   "copyrightYear": 2025,
   "copyrightHolder": "California Institute of Technology"
 }

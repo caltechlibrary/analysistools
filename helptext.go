@@ -43,9 +43,6 @@ mimetypes PATH [EXCLUDE_LIST_FILENAME]
 filetypes PATH [EXCLUDE_LIST_FILENAME]
 : Walk the PATH directory and aggregate counts by file extension and mime type
 
-prune PATTERN_FILE PATH [EXCLUDE_LIST_FILENAME]
-: Walk the PATH directory and remove files that have at least one match in the PATTERN_FILE.
-
 PATTERN_FILE
 : This holds a list of patterns to match against, one pattern statement per line.
 

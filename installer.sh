@@ -1,11 +1,11 @@
 #!/bin/sh
-# generated with CMTools 0.0.2 4109f87
+# generated with CMTools 0.0.3 6a6319a
 
 #
 # Set the package name and version to install
 #
 PACKAGE="analysistools"
-VERSION="0.0.2"
+VERSION="0.0.3"
 GIT_GROUP="caltechlibrary"
 RELEASE="https://github.com/$GIT_GROUP/$PACKAGE/releases/tag/v$VERSION"
 if [ "$PKG_VERSION" != "" ]; then

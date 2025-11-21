@@ -322,6 +322,7 @@ func parseExcludeListFile(excludeListName string) ([]string, error) {
 	return excludeList, err
 }
 
+// MimeTypes lists all the files in a directory and their common mime types.
 func (app *PhraseCheckApp) MimeTypes(params []string) error {
 	if len(params) == 0 {
 		return fmt.Errorf("expected a starting directory to crawl")
@@ -407,11 +408,8 @@ func (app *PhraseCheckApp) FileTypeCounts(params []string) error {
 	return nil
 }
 
-func (app *PhraseCheckApp) PruneMatches(params []string) error {
-	return fmt.Errorf("PruneMatches(%+v) not implemented", params)
-}
 
-
+// Run provides the command line interface handling
 func (app *PhraseCheckApp) Run(appName string, action string, params []string) error {
 	app.appName = appName
 	switch action {
@@ -426,8 +424,6 @@ func (app *PhraseCheckApp) Run(appName string, action string, params []string) e
 		return app.CheckFile(params)
 	case "check-directory":
 		return app.CheckDirectory(params)
-	case "prune":
-		return app.PruneMatches(params)
 	default:
 		return fmt.Errorf("%q action not supported", action)
 	}

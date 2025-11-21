@@ -10,7 +10,7 @@ authors:
 
 
 repository_code: https://github.com/caltechlibrary/analysistools
-version: 0.0.2
+version: 0.0.3
 
 
 programming_language:
@@ -21,18 +21,16 @@ keywords:
   - analysis
   - text views
 
-date_released: 2025-11-20
+date_released: 2025-11-21
 ---
 
 About this software
 ===================
 
-## analysistools 0.0.2
+## analysistools 0.0.3
 
-Swapped filepath.Walk() with filepath.WalkDir() for improved performance.
-Refined checking process by implementing a tokenizer that returns words and new lines.
-Upgrade methods for matching to handle prefix and suffix asterix as well as as exact match.
-Improved proximity checking and testing.
+Renamed filetypes action to mimetypes and app func FileTypes to MimeTypes to better reflect the output.
+Removed prune option, since the output of the analysis includes filenames and can be easily processed with Python.
 
 ### Authors
 
