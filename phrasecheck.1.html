@@ -47,16 +47,17 @@ Display license
 </dl>
 <h1 id="action">ACTION</h1>
 <dl>
-<dt>check-file [OPTION] PATTERN_FILE FILE_TO_CHECK [FILE_TO_CHECK
-…]</dt>
+<dt>check [OPTION] PATTERN_FILE FILE_TO_CHECK [FILE_TO_CHECK …]</dt>
 <dd>
-Report the matches found based on PATTERN_FILE in the FILE_TO_CHECK.
+Report the matches found based on PATTERN_FILE in the FILE_TO_CHECK. Use
+‘phrasecheck check help’ to list available options for check.
 </dd>
 <dt>check-directory [OPTION] PATTERN_FILE PATH
 [EXCLUDE_LIST_FILENAME]</dt>
 <dd>
 Walk the directory indicated by PATH. Check any text files against the
-PATTERN_FILE contents. Report matches.
+PATTERN_FILE contents. Report matches. Use ‘phrasecheck check-directory
+help’ to list available options for check.
 </dd>
 <dt>mimetypes PATH [EXCLUDE_LIST_FILENAME]</dt>
 <dd>
@@ -66,6 +67,11 @@ Walk the PATH directory and report file and it’s likely mime type
 <dd>
 Walk the PATH directory and aggregate counts by file extension and mime
 type
+</dd>
+<dt>tokens FILENAME [FILENAME …]</dt>
+<dd>
+tokenize a file and display the tokens in CSV format (name, token, word
+number, line number)
 </dd>
 <dt>PATTERN_FILE</dt>
 <dd>

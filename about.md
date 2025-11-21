@@ -10,7 +10,7 @@ authors:
 
 
 repository_code: https://github.com/caltechlibrary/analysistools
-version: 0.0.3
+version: 0.0.4
 
 
 programming_language:
@@ -27,10 +27,11 @@ date_released: 2025-11-21
 About this software
 ===================
 
-## analysistools 0.0.3
+## analysistools 0.0.4
 
-Renamed filetypes action to mimetypes and app func FileTypes to MimeTypes to better reflect the output.
-Removed prune option, since the output of the analysis includes filenames and can be easily processed with Python.
+Added tokens action which will show you the tokens found in a text file in CSV format (filename, token, word number, line number).
+Switch filepath.Walk() to filepath.WalkDir().
+Added help for each action. Added a "-match-one" option for checking files and directory actions.
 
 ### Authors
 

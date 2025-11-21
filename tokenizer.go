@@ -36,15 +36,15 @@ func TokenReader(in io.Reader) ([]*Token, error) {
 	results := []*Token{}
 	for scanner.Scan() {
 		token := scanner.Text()
-		if token != "\n" {
+		if token == "\n" {
+			lineNo++
+		} else {
 			results = append(results, &Token{
 				Value: strings.TrimSpace(token),
 				LineNo: lineNo,
 				WordNo: wordNo,
 			})
 			wordNo++
-		} else {
-			lineNo++
 		}
 	}
 	if err := scanner.Err(); err != nil {

@@ -2,8 +2,10 @@ package analysistools
 
 import (
 	"bufio"
+	"flag"
 	"fmt"
 	"io"
+	"io/fs"
 	"os"
 	"path"
 	"path/filepath"
@@ -125,7 +127,8 @@ func LoadPatterns(patternFile string) ([]*Pattern, error) {
 // tokenMatches compares a token which may be prefixed or suffixed by an asterix and
 // determines if there is a match with the provided string.
 func tokenMatches(s string, expr string) bool {
-	// FIXME: we could actually use the Go RegExp engine here. Need to check if it would be faster.
+	//s = strings.ToLower(s)
+	// NOTE: we could actually use the Go RegExp engine here. Need to check if it would be faster.
 	switch {
 	case strings.HasPrefix(expr, "*") && strings.HasSuffix(expr, "*"):
 		// Checking for middle match
@@ -213,13 +216,13 @@ type PhraseCheckApp struct {
 const phraseCheckCSVHeader = "\"filename\",\"line no\",\"pattern\",\"phrase\""
 
 // checkFile will read a file stream and display matches to standard out and return any errors
-func checkFile(fName string, patterns []*Pattern) error {
+func checkFile(fName string, patterns []*Pattern, matchOne bool) error {
 	in, err := os.Open(fName)
 	if err != nil {
 		return err
 	}
 	defer in.Close()
-	matches, err := PhraseCheckReader(bufio.NewReader(in), patterns, false)
+	matches, err := PhraseCheckReader(bufio.NewReader(in), patterns, matchOne)
 	if err != nil {
 		return err
 	}
@@ -231,14 +234,18 @@ func checkFile(fName string, patterns []*Pattern) error {
 
 // checkDirectory takes an initial path, a set of pattens and optional exclude list and
 // walks the directory and reports matches for any text files found.
-func checkDirectory(startDir string, patterns []*Pattern, excludeList []string) error {
+func checkDirectory(startDir string, patterns []*Pattern, excludeList []string, matchOne bool) error {
+	var lastErr error
+
 	fmt.Println(phraseCheckCSVHeader)
-	err := filepath.Walk(startDir, func(path string, info os.FileInfo, err error) error {
+	err := filepath.WalkDir(startDir, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
-			return err
+			fmt.Fprintf(os.Stderr, "skipping %+v: %s\n", d.Type(), err)
+            lastErr = err
+            return nil
 		}
 		// Skip if it's a directory and in the exclude list
-		if info.IsDir() {
+		if d.IsDir() {
 			for _, exclude := range excludeList {
 				if strings.Contains(path, exclude) {
 					return filepath.SkipDir
@@ -253,13 +260,40 @@ func checkDirectory(startDir string, patterns []*Pattern, excludeList []string) 
 				return nil
 			}
 		}
-		return checkFile(path, patterns)
+		return checkFile(path, patterns, matchOne)
 	})
-	return err
+	if lastErr != nil {
+		if err != nil {
+	    	return fmt.Errorf("%s\n%s\n", lastErr, err)
+			
+		}
+		return lastErr
+	}
+    if err != nil {
+    	return err
+    }
+	return nil
 }
 
 
 func (app *PhraseCheckApp) CheckFile(params []string) error {
+	appName := filepath.Base(os.Args[0])
+	flagSet := flag.NewFlagSet("tokens", flag.ContinueOnError)
+	showHelp := false
+	matchOne := false
+	flagSet.BoolVar(&showHelp, "help", showHelp, "display help")
+	flagSet.BoolVar(&showHelp, "h", showHelp, "display help")
+	flagSet.BoolVar(&matchOne, "match-one", matchOne, "stop at first match")
+	flagSet.BoolVar(&matchOne, "1", matchOne, "stop at first match")
+	flagSet.Parse(params)
+	params = flagSet.Args()
+	if len(params) > 0 && params[0] == "help" {
+		showHelp = true
+	}
+	if showHelp {
+		fmt.Printf("%s\n", FmtHelp(CheckFileHelp, appName, Version, ReleaseDate, ReleaseHash))
+		return nil
+	}
 	if len(params) < 2 {
 		return fmt.Errorf("missing pattern filename and files to process")
 	}
@@ -271,7 +305,7 @@ func (app *PhraseCheckApp) CheckFile(params []string) error {
 	}
 	fmt.Println(phraseCheckCSVHeader)
 	for _, checkFName := range params {
-		if err := checkFile(checkFName, patterns); err != nil {
+		if err := checkFile(checkFName, patterns, matchOne); err != nil {
 			return err
 		}
 	}
@@ -279,6 +313,24 @@ func (app *PhraseCheckApp) CheckFile(params []string) error {
 }
 
 func (app *PhraseCheckApp) CheckDirectory(params []string) error {
+	appName := filepath.Base(os.Args[0])
+	flagSet := flag.NewFlagSet("tokens", flag.ContinueOnError)
+	showHelp := false
+	matchOne := false
+	flagSet.BoolVar(&showHelp, "help", showHelp, "display help")
+	flagSet.BoolVar(&showHelp, "h", showHelp, "display help")
+	flagSet.BoolVar(&matchOne, "match-one", matchOne, "stop at first match")
+	flagSet.BoolVar(&matchOne, "1", matchOne, "stop at first match")
+	flagSet.Parse(params)
+	params = flagSet.Args()
+	if len(params) > 0 && params[0] == "help" {
+		showHelp = true
+	}
+	if showHelp {
+		fmt.Printf("%s\n", FmtHelp(CheckDirectoryHelp, appName, Version, ReleaseDate, ReleaseHash))
+		return nil
+	}
+
 	if len(params) < 2 {
 		return fmt.Errorf("missing pattern filename and directory to process")
 	}
@@ -301,7 +353,7 @@ func (app *PhraseCheckApp) CheckDirectory(params []string) error {
 	if err != nil {
 		return err
 	}
-	if err := checkDirectory(dirName, patterns, excludeList); err != nil {
+	if err := checkDirectory(dirName, patterns, excludeList, matchOne); err != nil {
 		return err
 	}
 	return err
@@ -324,6 +376,20 @@ func parseExcludeListFile(excludeListName string) ([]string, error) {
 
 // MimeTypes lists all the files in a directory and their common mime types.
 func (app *PhraseCheckApp) MimeTypes(params []string) error {
+	appName := filepath.Base(os.Args[0])
+	flagSet := flag.NewFlagSet("mimetypes", flag.ContinueOnError)
+	showHelp := false
+	flagSet.BoolVar(&showHelp, "help", showHelp, "display help")
+	flagSet.BoolVar(&showHelp, "h", showHelp, "display help")
+	flagSet.Parse(params)
+	params = flagSet.Args()
+	if len(params) > 0 && params[0] == "help" {
+		showHelp = true
+	}
+	if showHelp {
+		fmt.Printf("%s\n", FmtHelp(MimeTypeHelp, appName, Version, ReleaseDate, ReleaseHash))
+		return nil
+	}
 	if len(params) == 0 {
 		return fmt.Errorf("expected a starting directory to crawl")
 	}
@@ -360,6 +426,20 @@ func (app *PhraseCheckApp) MimeTypes(params []string) error {
 }
 
 func (app *PhraseCheckApp) FileTypeCounts(params []string) error {
+	appName := filepath.Base(os.Args[0])
+	flagSet := flag.NewFlagSet("tokens", flag.ContinueOnError)
+	showHelp := false
+	flagSet.BoolVar(&showHelp, "help", showHelp, "display help")
+	flagSet.BoolVar(&showHelp, "h", showHelp, "display help")
+	flagSet.Parse(params)
+	params = flagSet.Args()
+	if len(params) > 0 && params[0] == "help" {
+		showHelp = true
+	}
+	if showHelp {
+		fmt.Printf("%s\n", FmtHelp(FileTypeCountsHelp, appName, Version, ReleaseDate, ReleaseHash))
+		return nil
+	}
 	if len(params) == 0 {
 		return fmt.Errorf("expected a starting directory to crawl")
 	}
@@ -408,6 +488,53 @@ func (app *PhraseCheckApp) FileTypeCounts(params []string) error {
 	return nil
 }
 
+func tokenizeFile(fName string) error {
+	in, err := os.Open(fName)
+	if err != nil {
+		return err
+	}
+	defer in.Close()
+	tokens, err := TokenReader(in)
+	if err != nil {
+		return err
+	}
+	for _, token := range tokens {
+		fmt.Printf("%q,%q,%d,%d\n", fName, token.Value, token.WordNo, token.LineNo)
+	}
+	return nil
+}
+
+// Tokens parses a file into tokens returning a token list in CSV format.
+func (app *PhraseCheckApp) Tokens(params []string) error {
+	appName := filepath.Base(os.Args[0])
+	flagSet := flag.NewFlagSet("tokens", flag.ContinueOnError)
+	showHelp := false
+	flagSet.BoolVar(&showHelp, "help", showHelp, "display help")
+	flagSet.BoolVar(&showHelp, "h", showHelp, "display help")
+	flagSet.Parse(params)
+	params = flagSet.Args()
+	if len(params) > 0 && params[0] == "help" {
+		showHelp = true
+	}
+	if showHelp {
+		fmt.Printf("%s\n", FmtHelp(TokensHelp, appName, Version, ReleaseDate, ReleaseHash))
+		return nil
+	}
+
+	if len(params) == 0 {
+		return fmt.Errorf("must include a filename to tokenize")
+	}
+	
+	fmt.Printf("%q,%q,%q,%q\n", "name", "token", "word", "line")
+	var lastErr error
+	for _, fName := range params {
+		if err := tokenizeFile(fName); err != nil {
+			fmt.Fprintf(os.Stderr, "%s: %s\n", fName, err)
+			lastErr = err
+		}
+	}
+	return lastErr
+}
 
 // Run provides the command line interface handling
 func (app *PhraseCheckApp) Run(appName string, action string, params []string) error {
@@ -416,11 +543,13 @@ func (app *PhraseCheckApp) Run(appName string, action string, params []string) e
 	case "help":
 		 fmt.Fprintf(os.Stdout, "%s\n", FmtHelp(HelpText, appName, Version, ReleaseDate, ReleaseHash))
 		 return nil
+	case "tokens":
+		return app.Tokens(params)
 	case "mimetypes":
 		return app.MimeTypes(params)
 	case "filetypes":
 		return app.FileTypeCounts(params)
-	case "check-file":
+	case "check":
 		return app.CheckFile(params)
 	case "check-directory":
 		return app.CheckDirectory(params)

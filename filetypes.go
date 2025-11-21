@@ -3,6 +3,7 @@ package analysistools
 import (
 	"fmt"
     "io/fs"
+    "os"
 	"path/filepath"
 	"strings"
 )
@@ -127,11 +128,15 @@ var extensionToMIME = map[string]string{
 }
 
 func FileTypes(initialDir string, excludeList []string) (map[string]string, error) {
-	fileTypes := make(map[string]string)
+    var lastErr error
+
+    fileTypes := make(map[string]string)
 
 	err := filepath.WalkDir(initialDir, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
-			return fmt.Errorf("walking failed %+v: %s", d.Type(), err)
+			fmt.Fprintf(os.Stderr, "skipping %+v: %s\n", d.Type(), err)
+            lastErr = err
+            return nil
 		}
 
 		// Skip if it's a directory and in the exclude list
@@ -163,6 +168,12 @@ func FileTypes(initialDir string, excludeList []string) (map[string]string, erro
 		fileTypes[path] = mimeType
 		return nil
 	})
+    if lastErr != nil {
+        if err != nil {
+        	return fileTypes, fmt.Errorf("%s\n%s\n", lastErr, err)
+        }
+    	return fileTypes, lastErr
+    }
     if err != nil {
     	return fileTypes, err
     }

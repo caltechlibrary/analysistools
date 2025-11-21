@@ -39,10 +39,10 @@
     "GNU Make >= 3",
     "PageFind >= 1.4.0"
   ],
-  "version": "0.0.3",
+  "version": "0.0.4",
   "developmentStatus": "concept",
   "issueTracker": "https://github.com/caltechlibrary/analysistools",
-  "releaseNotes": "Renamed filetypes action to mimetypes and app func FileTypes to MimeTypes to better reflect the output.\nRemoved prune option, since the output of the analysis includes filenames and can be easily processed with Python.",
+  "releaseNotes": "Added tokens action which will show you the tokens found in a text file in CSV format (filename, token, word number, line number).\nSwitch filepath.Walk() to filepath.WalkDir().\nAdded help for each action. Added a \"-match-one\" option for checking files and directory actions.",
   "copyrightYear": 2025,
   "copyrightHolder": "California Institute of Technology"
 }
