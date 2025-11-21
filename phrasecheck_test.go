@@ -149,7 +149,7 @@ func TestParsePattern(t *testing.T) {
 			input: "attorn*",
 			want: &Pattern{
 				Type:         Keyword,
-				Keyword:      "attorn",
+				Keyword1:      "attorn*",
 				OriginalText: "attorn*",
 			},
 			wantErr: false,
@@ -158,8 +158,8 @@ func TestParsePattern(t *testing.T) {
 			input: "attorn* w/5 client*",
 			want: &Pattern{
 				Type:         Proximity,
-				Keyword1:     "attorn",
-				Keyword2:     "client",
+				Keyword1:     "attorn*",
+				Keyword2:     "client*",
 				MaxDistance:  5,
 				OriginalText: "attorn* w/5 client*",
 			},
@@ -223,13 +223,13 @@ func TestLoadPatterns(t *testing.T) {
 	want := []*Pattern{
 		{
 			Type:         Keyword,
-			Keyword:      "attorn",
+			Keyword1:      "attorn*",
 			OriginalText: "attorn*",
 		},
 		{
 			Type:         Proximity,
-			Keyword1:     "attorn",
-			Keyword2:     "client",
+			Keyword1:     "attorn*",
+			Keyword2:     "client*",
 			MaxDistance:  5,
 			OriginalText: "attorn* w/5 client*",
 		},
@@ -245,48 +245,29 @@ func TestLoadPatterns(t *testing.T) {
 	}
 }
 
-func TestTokenizeLine(t *testing.T) {
-	tests := []struct {
-		input string
-		want  []string
-	}{
-		{
-			input: "The quick brown fox jumps over the lazy dog.",
-			want:  []string{"the", "quick", "brown", "fox", "jumps", "over", "the", "lazy", "dog"},
-		},
-		{
-			input: "Hello, world!",
-			want:  []string{"hello", "world"},
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.input, func(t *testing.T) {
-			got := TokenizeLine(tt.input)
-			if !equalStringSlices(got, tt.want) {
-				t.Errorf("TokenizeLine(%q) = %v, want %v", tt.input, got, tt.want)
-			}
-		})
-	}
-}
-
 func TestCheckProximity(t *testing.T) {
+	txt := "the quick brown fox jumps"
+	tokens, err := Tokenizer(txt)
+	if err != nil {
+		t.Error(err)
+		t.FailNow()
+	}
 	tests := []struct {
-		tokens      []string
+		tokens      []*Token
 		keyword1    string
 		keyword2    string
 		maxDistance int
 		want        bool
 	}{
 		{
-			tokens:      []string{"the", "quick", "brown", "fox", "jumps"},
+			tokens: tokens,
 			keyword1:    "quick",
 			keyword2:    "fox",
 			maxDistance: 2,
 			want:        true,
 		},
 		{
-			tokens:      []string{"the", "quick", "brown", "fox", "jumps"},
+			tokens: tokens,
 			keyword1:    "quick",
 			keyword2:    "jumps",
 			maxDistance: 2,
@@ -295,8 +276,8 @@ func TestCheckProximity(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		t.Run(strings.Join(tt.tokens, ","), func(t *testing.T) {
-			got := CheckProximity(tt.tokens, tt.keyword1, tt.keyword2, tt.maxDistance)
+		t.Run(txt, func(t *testing.T) {
+			_, got := CheckProximity(tt.tokens, tt.keyword1, tt.keyword2, tt.maxDistance)
 			if got != tt.want {
 				t.Errorf("CheckProximity(%v, %q, %q, %d) = %v, want %v", tt.tokens, tt.keyword1, tt.keyword2, tt.maxDistance, got, tt.want)
 			}
@@ -313,16 +294,42 @@ func TestPhraseCheckReader(t *testing.T) {
 		wantErr bool
 	}{
 		{
+			name:  "Keyword match",
+			input: "The attorn represented the client.",
+			patterns: []*Pattern{
+				{
+					Type:         Keyword,
+					Keyword1:      "attorn",
+					OriginalText: "attorn*",
+				},
+			},
+			want: "0,\"attorn*\",\"attorn\"",
+			wantErr: false,
+		},
+		{
 			name:  "keyword match",
 			input: "The attorn represented the client.",
 			patterns: []*Pattern{
 				{
 					Type:         Keyword,
-					Keyword:      "attorn",
-					OriginalText: "attorn*",
+					Keyword1:     "attorn",
+					OriginalText: "attorn",
 				},
 			},
-			want: "Line 0: Match for \"attorn*\" in : \"The attorn represented the client.\"",
+			want: "0,\"attorn\",\"attorn\"",
+			wantErr: false,
+		},
+		{
+			name:  "keyword match",
+			input: "The attorn represented the client.",
+			patterns: []*Pattern{
+				{
+					Type:         Keyword,
+					Keyword1:     "*sented",
+					OriginalText: "*sented",
+				},
+			},
+			want: "0,\"*sented\",\"represented\"",
 			wantErr: false,
 		},
 		{
@@ -331,34 +338,49 @@ func TestPhraseCheckReader(t *testing.T) {
 			patterns: []*Pattern{
 				{
 					Type:         Proximity,
-					Keyword1:     "attorn",
-					Keyword2:     "client",
+					Keyword1:     "attorn*",
+					Keyword2:     "client*",
 					MaxDistance:  5,
 					OriginalText: "attorn* w/5 client*",
 				},
 			},
-			want: "Line 0: Match for \"attorn* w/5 client*\" in : \"The attorn represented the client.\"",
+			want: "0,\"attorn* w/5 client*\",\"attorn\"",
 			wantErr: false,
 		},
 		{
-			name: "keyword match",
+			name: "proximity match",
 			input: "Regarding ATTY-CLIENT PRIVILEDGE materials you sent",
 			patterns: []*Pattern{
 				{
-					Type:         Proximity,
-					Keyword: "ATTY-CLIENT PRIVILEGE",
-					MaxDistance:  0,
+					Type:     Proximity,
+					Keyword1: "ATTY-CLIENT",
+					Keyword2: "PRIVILEDGE",
+					MaxDistance:  1,
+					OriginalText: "ATTY-CLIENT PRIVILEDGE",
+				},
+			},
+			want: "0,\"ATTY-CLIENT PRIVILEDGE\",\"ATTY-CLIENT\"",
+			wantErr: false,
+		},
+		{
+			name: "proximity match",
+			input: "Regarding ATTY-CLIENT PRIVILEDGE materials you sent",
+			patterns: []*Pattern{
+				{
+					Type:     Proximity,
+					Keyword1: "ATTY-CLIENT",
+					Keyword2: "PRIVILEDGE*",
+					MaxDistance:  1,
 					OriginalText: "ATTY-CLIENT PRIVILEDGE*",
 				},
 			},
-			want: "Line 0: Match for \"ATTY-CLIENT PRIVILEDGE*\" in : \"Regarding ATTY-CLIENT PRIVILEDGE materials you sent\"",
+			want: "0,\"ATTY-CLIENT PRIVILEDGE*\",\"ATTY-CLIENT\"",
 			wantErr: false,
 		},
 	}
 
-	for _, tt := range tests {
-		reader := strings.NewReader(tt.input)
-		matched, err := PhraseCheckReader(reader, tt.patterns, false)
+	for i, tt := range tests {
+		matched, err := PhraseCheck(tt.input, tt.patterns, false)
 		if err == nil && tt.wantErr  {
 			t.Errorf("expected error, got matched %s for input %q", MatchedStrings(matched), tt.input)
 			continue
@@ -369,7 +391,7 @@ func TestPhraseCheckReader(t *testing.T) {
 		}
 		got := MatchedStrings(matched)
 		if got != tt.want {
-			t.Errorf("PhraseCheckReader() output = %q, want %q", got, tt.want)
+			t.Errorf("expected (%d) %q, got %q for input %q", i, tt.want, got, tt.input)
 		}
 	}
 }
@@ -380,7 +402,6 @@ func patternsEqual(a, b *Pattern) bool {
 		return a == b
 	}
 	return a.Type == b.Type &&
-		a.Keyword == b.Keyword &&
 		a.Keyword1 == b.Keyword1 &&
 		a.Keyword2 == b.Keyword2 &&
 		a.MaxDistance == b.MaxDistance &&

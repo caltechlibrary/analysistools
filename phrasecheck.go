@@ -7,7 +7,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"regexp"
+	//"regexp"
 	"strconv"
 	"strings"
 )
@@ -24,11 +24,13 @@ const (
 type Matched struct {
 	Text string
 	Pattern string
-	Line int
+	PatternType PatternType
+	LineNo int
+	WordNo int
 }
 
 func (m *Matched) String() string {
-	return fmt.Sprintf("%d,%q,%q", m.Line, m.Pattern, m.Text)
+	return fmt.Sprintf("%d,%q,%q", m.LineNo, m.Pattern, m.Text)
 }
 
 func MatchedStrings(matches []*Matched) string {
@@ -42,7 +44,6 @@ func MatchedStrings(matches []*Matched) string {
 // Pattern represents a parsed pattern.
 type Pattern struct {
 	Type         PatternType
-	Keyword      string
 	Keyword1     string
 	Keyword2     string
 	MaxDistance  int
@@ -59,30 +60,31 @@ func ParsePattern(pattern string) (*Pattern, error) {
 	if len(parts) > 3 {
 		return nil, fmt.Errorf("malformed proximity pattern: %q", pattern)
 	}
-	if len(parts) == 1 {
-		return &Pattern{
-			Type: Keyword,
-			Keyword: strings.TrimSuffix(parts[0], "*"),
-			OriginalText: pattern,
-		}, nil
+	// Setup the first keyword in pattern
+	p := &Pattern{}
+	p.OriginalText = pattern
+	p.Type = Keyword
+	token := parts[0]
+	if strings.HasPrefix(token, "w/") {
+		return nil, fmt.Errorf("malformed proximity pattern: %q", pattern)
 	}
+	p.Keyword1 = token
+	if len(parts) == 1 {
+		return p, nil
+	}
+	// We have a proximity pattern so set that up.
+	token = parts[1]
+	p.Type = Proximity
 	if len(parts) == 2 {
-		if strings.HasPrefix(parts[1], "w/") {
+		p.Keyword2 = token
+		if strings.HasPrefix(token, "w/") {
 			return nil, fmt.Errorf("malformed proximity pattern: %q", pattern)
 		}
-		return &Pattern{
-			Type: Keyword,
-			Keyword: pattern,
-			OriginalText: pattern,
-		}, nil
-	}
+		p.MaxDistance = 1
+		return p, nil
+	}	
 	// Proximity pattern: e.g., "attorn* w/5 client*"
-	p := &Pattern{
-		Type: Proximity,
-		Keyword1: strings.TrimSuffix(parts[0], "*"),
-		Keyword2: strings.TrimSuffix(parts[2], "*"),
-		OriginalText: pattern,
-	}
+	p.Keyword2 = parts[2]
 	if strings.HasPrefix(parts[1], "w/") {
 		maxDistance, err := strconv.Atoi(parts[1][2:])
 		if err != nil {
@@ -120,90 +122,88 @@ func LoadPatterns(patternFile string) ([]*Pattern, error) {
 	return patterns, nil
 }
 
-// TokenizeLine tokenizes a line into words.
-func TokenizeLine(line string) []string {
-	re := regexp.MustCompile(`\w+`)
-	words := re.FindAllString(line, -1)
-	for i, word := range words {
-		words[i] = strings.ToLower(word)
+// tokenMatches compares a token which may be prefixed or suffixed by an asterix and
+// determines if there is a match with the provided string.
+func tokenMatches(s string, expr string) bool {
+	// FIXME: we could actually use the Go RegExp engine here. Need to check if it would be faster.
+	switch {
+	case strings.HasPrefix(expr, "*") && strings.HasSuffix(expr, "*"):
+		// Checking for middle match
+		return strings.Contains(s, strings.TrimSuffix(strings.TrimPrefix(expr, "*"), "*"))
+	case strings.HasPrefix(expr, "*"):
+		// Checking for Suffix match
+		return strings.HasSuffix(s, strings.TrimPrefix(expr, "*"))
+	case strings.HasSuffix(expr, "*"):
+		// Checking for Prefix match
+		return strings.HasPrefix(s, strings.TrimSuffix(expr, "*"))
+	default:
+		// Check for exact match
+		return expr == s
 	}
-	return words
-}
-
-// TokenizeFile tokenizes the input file into words, line by line.
-func TokenizeFile(inputFile string) ([][]string, error) {
-	file, err := os.Open(inputFile)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-
-	var lines [][]string
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		line := scanner.Text()
-		tokens := TokenizeLine(line)
-		lines = append(lines, tokens)
-	}
-	if err := scanner.Err(); err != nil {
-		return nil, err
-	}
-	return lines, nil
 }
 
 // CheckProximity checks if keyword2 appears within maxDistance words after keyword1.
-func CheckProximity(tokens []string, keyword1, keyword2 string, maxDistance int) bool {
+func CheckProximity(tokens []*Token, keyword1 string, keyword2 string, maxDistance int) (*Token, bool) {
+	result := &Token{}
+	// Make a copy to iterate through
 	for i, token := range tokens {
-		if strings.HasPrefix(token, keyword1) {
+		if tokenMatches(token.Value, keyword1)  {
+			result = token
+			// Look ahead to find the next match based on max distance
 			end := i + maxDistance + 1
 			if end > len(tokens) {
 				end = len(tokens)
 			}
 			for j := i + 1; j < end; j++ {
-				if strings.HasPrefix(tokens[j], keyword2) {
-					return true
+				if tokenMatches(tokens[j].Value, keyword2) {
+					return result, true
 				}
 			}
 		}
 	}
-	return false
+	return nil, false
 }
 
+// PharseCheck takes a string, patterns and a matchOne boolean and returns
+// any matches and errors.
+func PhraseCheck(s string, patterns []*Pattern, matchOne bool) ([]*Matched, error) {
+	in := strings.NewReader(s)
+	return PhraseCheckReader(in, patterns, matchOne)
+}
 
 // PhraseCheckReader evaluates the input from an io.Reader for all patterns.
 func PhraseCheckReader(reader io.Reader, patterns []*Pattern, matchOne bool) ([]*Matched, error) {
 	result := []*Matched{}
-	scanner := bufio.NewScanner(reader)
-	for lineNumber := 0; scanner.Scan(); lineNumber++ {
-		line := scanner.Text()
-		tokens := TokenizeLine(line)
-		for _, pattern := range patterns {
-			switch pattern.Type {
-			case Keyword:
-				for _, token := range tokens {
-					if strings.HasPrefix(token, pattern.Keyword) {
-						result = append(result, &Matched{
-							Text: line,
-							Pattern: pattern.OriginalText,
-							Line: lineNumber,
-						})
-					}
-				}
-			case Proximity:
-				if CheckProximity(tokens, pattern.Keyword1, pattern.Keyword2, pattern.MaxDistance) {
+	tokens, err := TokenReader(reader)
+	if err != nil {
+		return nil, err
+	}
+	for _, pattern := range patterns {
+		switch pattern.Type {
+		case Keyword:
+			for _, token := range tokens {
+				if tokenMatches(token.Value, pattern.Keyword1) {
 					result = append(result, &Matched{
-						Text: line,
+						Text: token.Value,
 						Pattern: pattern.OriginalText,
-						Line: lineNumber,
+						LineNo: token.LineNo,
 					})
 				}
 			}
-			if matchOne && len(result) > 0 {
-				return result, scanner.Err()
+		case Proximity:
+			if token, ok := CheckProximity(tokens, pattern.Keyword1, pattern.Keyword2, pattern.MaxDistance); ok {
+				result = append(result, &Matched{
+					Text: token.Value,
+					Pattern: pattern.OriginalText,
+					LineNo: token.LineNo,
+				})
 			}
 		}
+		if matchOne && len(result) > 0 {
+			return result, nil
+		}
 	}
-	return result, scanner.Err()
+	return result, nil
 }
 
 type PhraseCheckApp struct {
