@@ -42,7 +42,7 @@
   "version": "0.0.2",
   "developmentStatus": "concept",
   "issueTracker": "https://github.com/caltechlibrary/analysistools",
-  "releaseNotes": "Swapped filepath.Walk() with filepath.WalkDir() for improved performance.",
+  "releaseNotes": "Swapped filepath.Walk() with filepath.WalkDir() for improved performance.\nRefined checking process by implementing a tokenizer that returns words and new lines.\nUpgrade methods for matching to handle prefix and suffix asterix as well as as exact match.\nImproved proximity checking and testing.",
   "copyrightYear": 2025,
   "copyrightHolder": "California Institute of Technology"
 }
