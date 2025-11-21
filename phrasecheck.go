@@ -322,7 +322,7 @@ func parseExcludeListFile(excludeListName string) ([]string, error) {
 	return excludeList, err
 }
 
-func (app *PhraseCheckApp) FileTypes(params []string) error {
+func (app *PhraseCheckApp) MimeTypes(params []string) error {
 	if len(params) == 0 {
 		return fmt.Errorf("expected a starting directory to crawl")
 	}
@@ -418,9 +418,9 @@ func (app *PhraseCheckApp) Run(appName string, action string, params []string) e
 	case "help":
 		 fmt.Fprintf(os.Stdout, "%s\n", FmtHelp(HelpText, appName, Version, ReleaseDate, ReleaseHash))
 		 return nil
+	case "mimetypes":
+		return app.MimeTypes(params)
 	case "filetypes":
-		return app.FileTypes(params)
-	case "filetype-counts":
 		return app.FileTypeCounts(params)
 	case "check-file":
 		return app.CheckFile(params)

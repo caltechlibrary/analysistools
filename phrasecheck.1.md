@@ -1,4 +1,4 @@
-%phrasecheck(1) user manual | version 0.0.2 80de188
+%phrasecheck(1) user manual | version 0.0.2 4109f87
 % R. S. Doiel
 % 2025-11-20
 
@@ -34,10 +34,10 @@ check-directory [OPTION] PATTERN_FILE PATH [EXCLUDE_LIST_FILENAME]
 : Walk the directory indicated by PATH. Check any text files against the
 PATTERN_FILE contents. Report matches.
 
-filetypes PATH [EXCLUDE_LIST_FILENAME]
+mimetypes PATH [EXCLUDE_LIST_FILENAME]
 : Walk the PATH directory and report file and it's likely mime type
 
-filetype-counts PATH [EXCLUDE_LIST_FILENAME]
+filetypes PATH [EXCLUDE_LIST_FILENAME]
 : Walk the PATH directory and aggregate counts by file extension and mime type
 
 prune PATTERN_FILE PATH [EXCLUDE_LIST_FILENAME]
