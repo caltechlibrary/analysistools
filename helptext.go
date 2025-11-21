@@ -124,10 +124,10 @@ FileTypeCountsHelp = `%{app_name}-filetypes(1) user manual | version {version} {
 
 # DESCRIPTION
 
-**{app_name} filetypes** walk the PATH and return a cound of files by
+**{app_name} filetypes** walk the PATH and return a count of files by
 file extension. Files which start with a "." will be considered an extension.
 
-Extentions are start with the last period in the path's basename and continue to the
+Extensions are start with the last period in the path's basename and continue to the
 end of the file's basename.
 
 # OPTIONS
@@ -188,7 +188,7 @@ CheckFileHelp = `%{app_name}-check(1) user manual | version {version} {release_h
 # DESCRIPTION
 
 Report the matches found based on PATTERN_FILE in the FILE_TO_CHECK. If more than
-one file is included they will be checked conseculatively and included in the CSV
+one file is included they will be checked consecutively and included in the CSV
 output.
 
 PATTERN_FILE
