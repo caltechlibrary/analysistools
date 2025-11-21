@@ -1,5 +1,5 @@
 #!/bin/sh
-# generated with CMTools 0.0.4 a369813
+# generated with CMTools 0.0.4 bc3aa28
 
 #
 # Set the package name and version to install

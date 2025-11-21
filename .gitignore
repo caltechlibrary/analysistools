@@ -2,6 +2,7 @@
 *.tmp
 *.swp
 *.bak
+TODO.html
 bin/
 man/
 dist/
